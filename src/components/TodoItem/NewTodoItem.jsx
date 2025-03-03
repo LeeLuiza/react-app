@@ -3,9 +3,10 @@ import {TodoItemContainer} from './TodoItemContainer';
 import {TodoItemCheckbox} from './TodoItemCheckbox';
 import styled from 'styled-components';
 import {useSaveNewTodoItem} from '../../data/hooks/useData';
+import { PrioritySelector } from './PrioritySelector';
 
 
-const Input = styled.input`
+const Input = styled.textarea`
   flex-grow: 1;
 
   &::placeholder {
@@ -13,11 +14,11 @@ const Input = styled.input`
     color: rgba(63,63,63,0.6);
   }
 `
-
 export const NewTodoItem = () => {
   const {mutate, isPending, isSuccess} = useSaveNewTodoItem();
   const [value, setValue] = useState('');
   const inputRef = useRef();
+  const [priority, setPriority] = useState('medium');
 
   useEffect(() => {
     if (!isPending && isSuccess) {
@@ -41,7 +42,7 @@ export const NewTodoItem = () => {
       return;
     }
 
-    mutate({title: value});
+    mutate({title: value, priority});
   }
 
   return (
@@ -55,6 +56,7 @@ export const NewTodoItem = () => {
         placeholder='Write a task...'
         disabled={isPending}
       />
+      <PrioritySelector selectedPriority={priority} onPriorityChange={setPriority} isSaved={false}/> 
     </TodoItemContainer>
   )
 }

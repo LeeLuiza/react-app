@@ -2,6 +2,9 @@ import React from 'react';
 import styled, { css } from "styled-components"
 import {TodoItemContainer} from './TodoItemContainer'
 import {TodoItemCheckbox} from './TodoItemCheckbox';
+import { useDeleteTodoItem  } from '../../data/hooks/useData';
+import { useToggleTodoItem  } from '../../data/hooks/useData';
+import { PrioritySelector } from './PrioritySelector';
 
 const checkedCss = css`
   color: #B5B5BA;
@@ -12,6 +15,7 @@ const Title = styled.span(props => {
   return `
     font-size: 15px;
     ${props.checked ? checkedCss : ''};
+    white-space: pre-wrap;
   `;
 })
 
@@ -26,14 +30,29 @@ const Delete = styled.span`
   cursor: pointer;
 `;
 
-export const TodoItem = ({title, checked}) => {
+export const TodoItem = ({key, title, checked, id, priority}) => {
+  const { mutate: deleteItem } = useDeleteTodoItem();
+  const { mutate: toggleItem } = useToggleTodoItem();
+
+  const handleDelete = () => {
+    // eslint-disable-next-line no-restricted-globals
+    if (confirm('Вы уверены, что хотите удалить этот элемент?')) {
+      deleteItem(id);
+    }
+  }
+
+  const handleToggle = () => {
+    toggleItem({ id, checked: !checked, priority: priority });
+  };
+
   return (
     <TodoItemContainer>
-      <TodoItemCheckbox checked={checked} />
+      <TodoItemCheckbox checked={checked} onClick={handleToggle}/>
       <Title checked={checked}>
         {title}
       </Title>
-      <Delete />
+      <PrioritySelector selectedPriority={priority} isSaved={true}/>
+      <Delete onClick={handleDelete} />
     </TodoItemContainer>
   )
 }

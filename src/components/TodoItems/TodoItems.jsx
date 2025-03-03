@@ -7,6 +7,7 @@ import {SearchInput} from './components/SearchInput';
 
 export const TodoItems = () => {
   const [searchValue, setSearchValue] = useState('');
+  const [isAscending, setIsAscending] = useState(true);
 
   const {data: todoItems, isLoading} = useData();
 
@@ -18,27 +19,39 @@ export const TodoItems = () => {
     );
   }
 
-  // Фукнция filter вызывает для каждого элемента переданный ей колбек
-  // И формирует в filteredBySearchItems новый массив элементов, для которых колбек вернул true
-  // Для проверки вхождения подстроки в строку нужно использовать indexOf
+  const clearedSearchValue = searchValue.trim().toLowerCase();
+
   const filteredBySearchItems = todoItems.filter((todoItem) => {
-    // const clearedTodoItemTitle = очистка от пробелов + приведение к одному из регистров
-    // const clearedSearchValue = очистка от пробелов + приведение к одному из регистров
-    // const isSearched = проверка вхождения строки поиска в строку заголовка
-    // return isSearched
-    return true; // удалить после реализации фильтрации
-  })
-
-
-  const todoItemsElements = filteredBySearchItems.map((item, index) => {
-    return <TodoItem key={item.id} title={item.title} checked={item.isDone} />;
+    if (clearedSearchValue.length < 3) {
+      return true;
+    }
+    const clearedTodoItemTitle = todoItem.title.trim().toLowerCase();
+    const isSearched = clearedTodoItemTitle.indexOf(clearedSearchValue) !== -1;
+    return isSearched;
   });
+
+  const sortedTodoItems = filteredBySearchItems.sort((a, b) => {
+    const priorityOrder = ['high', 'medium', 'low'];
+    const comparison = priorityOrder.indexOf(a.priority) - priorityOrder.indexOf(b.priority);
+    return isAscending ? comparison : -comparison;
+  });
+
+  const todoItemsElements = sortedTodoItems.map((item) => {
+    return <TodoItem key={item.id} title={item.title} checked={item.isDone} id={item.id} priority={item.priority} />;
+  });
+
+  const toggleSortOrder = () => {
+    setIsAscending(!isAscending);
+  };
 
   return (
     <TodoItemsContainer>
-      <SearchInput value={searchValue} />
+      <SearchInput value={searchValue} setValue={setSearchValue} />
       {todoItemsElements}
       <NewTodoItem />
+      <button onClick={toggleSortOrder}>
+        Сортировать по приоритету: {isAscending ? 'По возрастанию' : 'По убыванию'}
+      </button>
     </TodoItemsContainer>
-  )
+  );
 }
